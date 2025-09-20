@@ -562,8 +562,8 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
 
   // Cleanup intervals on unmount
   useEffect(() => {
+    const intervals = intervalsRef.current;
     return () => {
-      const intervals = intervalsRef.current;
       intervals.forEach((intervalId) => {
         clearInterval(intervalId);
       });
@@ -786,7 +786,7 @@ export default function Home() {
   }, [apiKey]);
 
   // Filter nodes based on search term
-  const filterNodes = (nodes: ApiNode[], searchTerm: string): ApiNode[] => {
+  const filterNodes = useCallback((nodes: ApiNode[], searchTerm: string): ApiNode[] => {
     if (!searchTerm.trim()) return nodes;
 
     const filtered: ApiNode[] = [];
@@ -810,7 +810,7 @@ export default function Home() {
     }
 
     return filtered;
-  };
+  }, []);
 
   const filteredNodes = useMemo(() => {
     return filterNodes(nodes, searchTerm);
@@ -962,10 +962,10 @@ export default function Home() {
                   <div>
                     <h3 className="font-semibold text-lg mb-2">3. Using the Inspector</h3>
                     <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                      <li>Browse the node tree to explore TSW's internal structure</li>
+                      <li>Browse the node tree to explore TSW&apos;s internal structure</li>
                       <li>Click on nodes to view their values and endpoints</li>
                       <li>Use the search box to quickly find specific nodes</li>
-                      <li>Click "Watch" on endpoints to monitor live values</li>
+                      <li>Click &quot;Watch&quot; on endpoints to monitor live values</li>
                       <li>Interact with controls (buttons, levers) when available</li>
                     </ul>
                   </div>
@@ -973,7 +973,7 @@ export default function Home() {
                   <div>
                     <h3 className="font-semibold text-lg mb-2">Troubleshooting</h3>
                     <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                      <li>Ensure TSW is running and you're in a session</li>
+                      <li>Ensure TSW is running and you&apos;re in a session</li>
                       <li>Check that the -HTTPAPI flag is properly set</li>
                       <li>Make sure no firewall is blocking localhost:31270</li>
                     </ul>

@@ -637,22 +637,6 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
         </div>
       )}
 
-      {/* Show child nodes if available */}
-      {nodeData.Nodes && nodeData.Nodes.length > 0 && (
-        <div className="mb-6">
-          <h4 className="text-md font-semibold mb-2">Child Nodes:</h4>
-          <div className="space-y-1">
-            {nodeData.Nodes.map((node) => (
-              <div key={node.NodePath} className="flex justify-between items-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-                <span className="font-mono text-sm font-medium">{node.NodeName}</span>
-                <span className="font-mono text-xs text-gray-600 dark:text-gray-400">
-                  {node.NodePath}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Show endpoints if available */}
       {nodeData.Endpoints && nodeData.Endpoints.length > 0 && (
@@ -665,12 +649,12 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
                 <div key={index} className="bg-green-50 dark:bg-green-900/20 rounded">
                   <div className="flex justify-between items-center p-2">
                     <div
-                      className="flex-1 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors rounded p-1 -m-1"
+                      className="flex-1 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors rounded p-1"
                       onClick={() => handleEndpointClick(endpoint.Name)}
                     >
                       <span className="font-mono text-sm font-medium">{endpoint.Name}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 p-1">
                       {endpointValue?.loading && (
                         <span className="text-xs text-gray-500">Loading...</span>
                       )}
@@ -794,6 +778,7 @@ export default function Home() {
   const [apiKey, setApiKey] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const client = useMemo(() => {
     if (!apiKey) return null;
@@ -869,8 +854,8 @@ export default function Home() {
       <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
         <div className="w-full max-w-md p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">TSW API Inspector</h1>
-            <p className="text-gray-600 dark:text-gray-400">Connect to Train Sim World</p>
+            <h1 className="text-3xl font-bold mb-2">Train Sim World API Inspector</h1>
+            <p className="text-gray-600 dark:text-gray-400">Inspect and control in game data.<br />The API allows direct access to all information and controls of the environment and the train.</p>
           </div>
 
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 shadow-lg">
@@ -888,10 +873,6 @@ export default function Home() {
                   placeholder="Enter your TSW API key"
                   required
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Start Train Sim World with the -HTTPAPI flag to start the API.<br />
-                  Then use the key found in CommAPIKey.txt in your Train Sim World config directory.
-                </p>
               </div>
 
               {error && (
@@ -911,17 +892,106 @@ export default function Home() {
 
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Need help?</span>
-                <a
-                  href="https://redocly.github.io/redoc/?url=https://waaghals.github.io/tsw-inspector/openapi.yaml"
+                <button
+                  onClick={() => setShowHelpModal(true)}
                   className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                 >
-                  View API Docs
-                </a>
+                  Need help?
+                </button>
+                <div className="flex gap-4">
+                  <a
+                    href="https://redocly.github.io/redoc/?url=https://waaghals.github.io/tsw-inspector/openapi.yaml"
+                    className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    View API Docs
+                  </a>
+                  <a
+                    href="https://github.com/waaghals/tsw-inspector"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    GitHub
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Help Modal */}
+        {showHelpModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Getting Started with TSW API Inspector</h2>
+                  <button
+                    onClick={() => setShowHelpModal(false)}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="space-y-6 text-sm">
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">1. Enable the Train Sim World API</h3>
+                    <p className="mb-2">To use this inspector, you need to start Train Sim World with the HTTP API enabled:</p>
+                    <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded font-mono text-xs">
+                      TrainSimWorld5.exe -HTTPAPI
+                    </div>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400">
+                      Add this flag to your Steam launch options or create a shortcut with this parameter.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">2. Find Your API Key</h3>
+                    <p className="mb-2">Once TSW is running with the API enabled, find your API key in:</p>
+                    <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded font-mono text-xs break-all">
+                      %USERPROFILE%\Documents\My Games\TrainSimWorld5\Saved\Config\CommAPIKey.txt
+                    </div>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400">
+                      Copy the entire contents of this file and paste it into the API Key field above.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">3. Using the Inspector</h3>
+                    <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                      <li>Browse the node tree to explore TSW's internal structure</li>
+                      <li>Click on nodes to view their values and endpoints</li>
+                      <li>Use the search box to quickly find specific nodes</li>
+                      <li>Click "Watch" on endpoints to monitor live values</li>
+                      <li>Interact with controls (buttons, levers) when available</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Troubleshooting</h3>
+                    <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                      <li>Ensure TSW is running and you're in a session</li>
+                      <li>Check that the -HTTPAPI flag is properly set</li>
+                      <li>Make sure no firewall is blocking localhost:31270</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={() => setShowHelpModal(false)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Got it!
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -953,12 +1023,6 @@ export default function Home() {
             >
               Disconnect
             </button>
-            <a
-              href="/docs"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            >
-              API Docs
-            </a>
           </div>
         </div>
 
@@ -966,7 +1030,16 @@ export default function Home() {
           {/* Nodes Tree */}
           <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
             <div className="bg-gray-100 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold mb-3">Nodes Tree</h2>
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-semibold">Nodes Tree</h2>
+                <button
+                  onClick={connectToAPI}
+                  disabled={loading}
+                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  {loading ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </div>
               <div className="relative">
                 <input
                   type="text"

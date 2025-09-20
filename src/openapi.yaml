@@ -1,0 +1,1068 @@
+openapi: 3.1.0
+info:
+  title: Train Sim World API
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit/
+  contact:
+    name: Waaghals
+    url: https://github.com/waaghals
+  version: 1.0.0
+  description: |
+    Train Sim World for controller trains.
+
+servers:
+  - url: http://localhost:31270
+    description: Local game
+  
+security: 
+  -  apikey: []
+
+components:
+  securitySchemes:
+    apikey:
+      type: apiKey
+      in: header
+      name: DTGCommKey
+      description: API key to authorize requests. The key can be found can be found in CommAPIKey.txt in the game config directory.
+  schemas:
+    NameNode:
+      type: object
+      required: [Name]
+      properties:
+        Name:
+          type: string
+    RecursiveNode:
+      type: object
+      required: [NodeName, NodePath, Nodes]
+      properties:
+        NodeName:
+          type: string
+        NodePath:
+          type: string
+        Nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecursiveNode'
+    Endpoint:
+      type: object
+      required: [Name, Writable]
+      properties:
+        Name:
+          type: string
+        Writable:
+          type: boolean
+    SpecificList:
+      type: object
+      required: [Result, NodePath, NodeName, Nodes, Endpoints]
+      properties:
+        Result:
+          type: string
+          enum: [Success]  
+        NodePath:
+          type: string
+        NodeName:
+          type: string
+        Nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NameNode'
+        Endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/Endpoint'
+      examples:
+        - {
+            "Result": "Success",
+            "NodePath": "DriverInput",
+            "NodeName": "DriverInput",
+            "Nodes": [
+                {
+                    "Name": "Reverser_F"
+                },
+                {
+                    "Name": "BatteryControlSwitch_F"
+                },
+                {
+                    "Name": "MasterController_F"
+                },
+                {
+                    "Name": "AFB_Speed_F"
+                },
+                {
+                    "Name": "TrainBrake_F"
+                },
+                {
+                    "Name": "DirectBrake_F"
+                },
+                {
+                    "Name": "AirCompressor_F"
+                },
+                {
+                    "Name": "PantographStateSwitch_F"
+                },
+                {
+                    "Name": "MainCircuitBreaker_F"
+                },
+                {
+                    "Name": "TrainLine_F"
+                },
+                {
+                    "Name": "PZB_Override_F"
+                },
+                {
+                    "Name": "PZB_Acknowledge_F"
+                },
+                {
+                    "Name": "TrainLights_F"
+                },
+                {
+                    "Name": "Sand_F"
+                },
+                {
+                    "Name": "ExteriorLightBrightness_F"
+                },
+                {
+                    "Name": "BrakeRelease_F"
+                },
+                {
+                    "Name": "EmergencyBrakeButton_F"
+                },
+                {
+                    "Name": "PantographSelector_Proxy"
+                },
+                {
+                    "Name": "BrakeSelector"
+                },
+                {
+                    "Name": "EmergencyBrakeOverride_F"
+                },
+                {
+                    "Name": "HornPedal_F"
+                },
+                {
+                    "Name": "SignalLights_F"
+                },
+                {
+                    "Name": "Blind_FL"
+                },
+                {
+                    "Name": "Blind_FR"
+                },
+                {
+                    "Name": "Wiper_F"
+                },
+                {
+                    "Name": "ParkingBrakeApply_F"
+                },
+                {
+                    "Name": "ParkingBrakeRelease_F"
+                },
+                {
+                    "Name": "S1_Button_Power_F"
+                },
+                {
+                    "Name": "S1_Button_Brightness_F"
+                },
+                {
+                    "Name": "S1_Button_Contrast_F"
+                },
+                {
+                    "Name": "S1_Button_C_F"
+                },
+                {
+                    "Name": "S1_Button_LeftArrow_F"
+                },
+                {
+                    "Name": "S1_Button_RightArrow_F"
+                },
+                {
+                    "Name": "S1_Button_UpArrow_F"
+                },
+                {
+                    "Name": "S1_Button_DownArrow_F"
+                },
+                {
+                    "Name": "S1_Button_E_F"
+                },
+                {
+                    "Name": "S1_Button_0_F"
+                },
+                {
+                    "Name": "S1_Button_1_F"
+                },
+                {
+                    "Name": "S1_Button_2_F"
+                },
+                {
+                    "Name": "S1_Button_3_F"
+                },
+                {
+                    "Name": "S1_Button_4_F"
+                },
+                {
+                    "Name": "S1_Button_5_F"
+                },
+                {
+                    "Name": "S1_Button_6_F"
+                },
+                {
+                    "Name": "S1_Button_7_F"
+                },
+                {
+                    "Name": "S1_Button_8_F"
+                },
+                {
+                    "Name": "S1_Button_9_F"
+                },
+                {
+                    "Name": "S2_Button_Power_F"
+                },
+                {
+                    "Name": "S2_Button_Brightness_F"
+                },
+                {
+                    "Name": "S2_Button_Contrast_F"
+                },
+                {
+                    "Name": "S2_Button_C_F"
+                },
+                {
+                    "Name": "S2_Button_UpArrow_F"
+                },
+                {
+                    "Name": "S2_Button_DownArrow_F"
+                },
+                {
+                    "Name": "S2_Button_E_F"
+                },
+                {
+                    "Name": "S2_Button_0_F"
+                },
+                {
+                    "Name": "S2_Button_1_F"
+                },
+                {
+                    "Name": "S2_Button_2_F"
+                },
+                {
+                    "Name": "S2_Button_3_F"
+                },
+                {
+                    "Name": "S2_Button_4_F"
+                },
+                {
+                    "Name": "S2_Button_5_F"
+                },
+                {
+                    "Name": "S2_Button_6_F"
+                },
+                {
+                    "Name": "S2_Button_7_F"
+                },
+                {
+                    "Name": "S2_Button_8_F"
+                },
+                {
+                    "Name": "S2_Button_9_F"
+                },
+                {
+                    "Name": "PZBMode"
+                },
+                {
+                    "Name": "PZB_Release_F"
+                },
+                {
+                    "Name": "ContactSignaller_F"
+                },
+                {
+                    "Name": "TrainLength_F"
+                },
+                {
+                    "Name": "HazardLights_F"
+                },
+                {
+                    "Name": "LZB_EmergencySwitch_F"
+                },
+                {
+                    "Name": "TrainBrakeButton_F"
+                },
+                {
+                    "Name": "DriversBrakeCutOut_F"
+                },
+                {
+                    "Name": "LeftDoorsOpen_F"
+                },
+                {
+                    "Name": "RightDoorsOpen_F"
+                },
+                {
+                    "Name": "AllDoorsClose_F"
+                },
+                {
+                    "Name": "Horn_F"
+                },
+                {
+                    "Name": "MasterKey_F"
+                },
+                {
+                    "Name": "ReverserForward_F"
+                },
+                {
+                    "Name": "ReverserNeutral_F"
+                },
+                {
+                    "Name": "ReverserReverse_F"
+                },
+                {
+                    "Name": "DoorControlCut-Out"
+                },
+                {
+                    "Name": "PZB_Isolation"
+                },
+                {
+                    "Name": "LZB_Isolation"
+                },
+                {
+                    "Name": "Sifa_Isolation"
+                },
+                {
+                    "Name": "Fuse_ReadingLight_F"
+                },
+                {
+                    "Name": "Fuse_HornHigh_F"
+                },
+                {
+                    "Name": "Fuse_HornLow_F"
+                },
+                {
+                    "Name": "AirConFanSpeed_F"
+                },
+                {
+                    "Name": "AirConTemp_F"
+                },
+                {
+                    "Name": "AirConMode_F"
+                },
+                {
+                    "Name": "BatteryButton_F"
+                },
+                {
+                    "Name": "SifaPedal_F"
+                },
+                {
+                    "Name": "CabLightReadingLight_F"
+                },
+                {
+                    "Name": "S1_Button_F1_F"
+                },
+                {
+                    "Name": "S1_Button_F2_F"
+                },
+                {
+                    "Name": "S1_Button_F3_F"
+                },
+                {
+                    "Name": "S1_Button_F4_F"
+                },
+                {
+                    "Name": "S1_Button_F5_F"
+                },
+                {
+                    "Name": "S1_Button_F6_F"
+                },
+                {
+                    "Name": "S2_Button_F1_F"
+                },
+                {
+                    "Name": "S2_Button_F2_F"
+                },
+                {
+                    "Name": "S2_Button_F3_F"
+                },
+                {
+                    "Name": "S2_Button_F4_F"
+                },
+                {
+                    "Name": "S2_Button_F5_F"
+                },
+                {
+                    "Name": "S2_Button_F6_F"
+                },
+                {
+                    "Name": "S2_Button_LeftArrow_F"
+                },
+                {
+                    "Name": "S2_Button_RightArrow_F"
+                },
+                {
+                    "Name": "LZB_DImmer_F"
+                },
+                {
+                    "Name": "OverchargeButton_F"
+                },
+                {
+                    "Name": "OverchargeButton_B"
+                },
+                {
+                    "Name": "AFB_Confirm_Speed_F"
+                },
+                {
+                    "Name": "AFB_ProxySwitchControl"
+                },
+                {
+                    "Name": "S4_Button_Power_F"
+                },
+                {
+                    "Name": "S4_Button_Brightness_F"
+                },
+                {
+                    "Name": "S4_Button_Contrast_F"
+                },
+                {
+                    "Name": "S4_Button_UD_F"
+                },
+                {
+                    "Name": "S1_Button_UD_F"
+                },
+                {
+                    "Name": "S4_Button_8_F"
+                },
+                {
+                    "Name": "S4_Button_9_F"
+                },
+                {
+                    "Name": "S2_Button_Language_F"
+                },
+                {
+                    "Name": "S2_Button_Info_F"
+                },
+                {
+                    "Name": "S2_Button_Faults_F"
+                },
+                {
+                    "Name": "S2_Button_FaultDetails_F"
+                },
+                {
+                    "Name": "S2_Button_UD_F"
+                },
+                {
+                    "Name": "S1_Button_Language_F"
+                },
+                {
+                    "Name": "S1_Button_Faults_F"
+                },
+                {
+                    "Name": "S1_Button_FaultDetails_F"
+                },
+                {
+                    "Name": "S4_Button_0_F"
+                },
+                {
+                    "Name": "S4_Button_1_F"
+                },
+                {
+                    "Name": "S4_Button_2_F"
+                },
+                {
+                    "Name": "S4_Button_3_F"
+                },
+                {
+                    "Name": "S4_Button_4_F"
+                },
+                {
+                    "Name": "S4_Button_5_F"
+                },
+                {
+                    "Name": "S4_Button_6_F"
+                },
+                {
+                    "Name": "S4_Button_7_F"
+                },
+                {
+                    "Name": "S1_Button_Info_F"
+                },
+                {
+                    "Name": "S1_Button_Info_B"
+                },
+                {
+                    "Name": "S4_Button_C_F"
+                },
+                {
+                    "Name": "S4_Button_LeftArrow_F"
+                },
+                {
+                    "Name": "S4_Button_RightArrow_F"
+                },
+                {
+                    "Name": "S4_Button_UpArrow_F"
+                },
+                {
+                    "Name": "S4_Button_DownArrow_F"
+                },
+                {
+                    "Name": "S4_Button_E_F"
+                },
+                {
+                    "Name": "S5_Button_1_F"
+                },
+                {
+                    "Name": "S5_Button_2_F"
+                },
+                {
+                    "Name": "S5_Button_3_F"
+                },
+                {
+                    "Name": "S5_Button_4_F"
+                },
+                {
+                    "Name": "S5_Button_6_F"
+                },
+                {
+                    "Name": "S5_Button_7_F"
+                },
+                {
+                    "Name": "S5_Button_8_F"
+                },
+                {
+                    "Name": "S5_Button_9_F"
+                },
+                {
+                    "Name": "S5_Button_0_F"
+                },
+                {
+                    "Name": "S5_Button_11_F"
+                },
+                {
+                    "Name": "S5_Button_12_F"
+                },
+                {
+                    "Name": "S5_Button_13_F"
+                },
+                {
+                    "Name": "S5_Button_14_F"
+                },
+                {
+                    "Name": "S5_Button_UpArrow_F"
+                },
+                {
+                    "Name": "S5_Button_DownArrow_F"
+                },
+                {
+                    "Name": "S5_Button_E_F"
+                },
+                {
+                    "Name": "S5_Button_R_F"
+                },
+                {
+                    "Name": "S5_Button_FDL_F"
+                },
+                {
+                    "Name": "S5_Button_Zub_F"
+                },
+                {
+                    "Name": "S5_Button_PA_F"
+                },
+                {
+                    "Name": "S5_Button_Intercom_F"
+                },
+                {
+                    "Name": "S5_Button_Emergency_F"
+                },
+                {
+                    "Name": "S5_Button_R_B"
+                },
+                {
+                    "Name": "SCMT_Button_G_F"
+                },
+                {
+                    "Name": "SCMT_Button_N_F"
+                },
+                {
+                    "Name": "SCMT_Button_G_B"
+                },
+                {
+                    "Name": "SCMT_Button_N_B"
+                }
+            ],
+            "Endpoints": []
+        }
+        - {
+            "Result": "Success",
+            "NodePath": "DriverInput/Wiper_F",
+            "NodeName": "Wiper_F",
+            "Nodes": [],
+            "Endpoints": [
+                {
+                    "Name": "Property.DefaultInputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.DigitalSensitivity",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.NotchSnapSensitivity",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.AnalogueSensitivity",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bIsRotationalLever",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bCustomOutputValueMapping",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bInputEnabled",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.BindControllerMethods",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bCanEnterGuardModeFromHere",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bIsSlaveLinked",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bTrackUsageStats",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bReplicates",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bAutoActivate",
+                    "Writable": false
+                },
+                {
+                    "Name": "Property.bIsEditorOnly",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.UnlockLeverRange",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetNotchCount",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetCurrentNotchIndex",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.CalcTargetOutputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.CalcTargetInputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.RequiresTick",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.IsDigitalIncreasing",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.IsDigitalDecreasing",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.IsDigitalChanging",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.IsChanging",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetOutputRange",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetNormalisedOutputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetNormalisedInputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetMinimumOutputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetMinimumInputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetMaximumOutputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetMaximumInputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetInputRange",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetDefaultInputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetCurrentOutputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetCurrentInputValue",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetCurrentAnalogueMovementRange",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.ConditionalEndTick",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.ConditionalBeginTick",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.CanDrag",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.IsComponentTickEnabled",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.IsBeingDestroyed",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.IsActive",
+                    "Writable": false
+                },
+                {
+                    "Name": "Function.GetComponentTickInterval",
+                    "Writable": false
+                },
+                {
+                    "Name": "ObjectName",
+                    "Writable": false
+                },
+                {
+                    "Name": "ObjectClass",
+                    "Writable": false
+                },
+                {
+                    "Name": "InputValue",
+                    "Writable": true
+                },
+                {
+                    "Name": "Interacting",
+                    "Writable": true
+                }
+            ]
+        }
+    Get:
+      type: object
+      required: [Result, Values]
+      properties:
+        Result:
+          type: string
+        Value:
+          type: object
+          properties:
+            ObjectName:
+              type: string
+            ObjectClass:
+              type: string
+            InputValue:
+              type: number
+            Interacting:
+              type: number
+      examples:
+        - Result: Success
+          Values:
+              InputValue: 1
+        - Result: Success
+          Values:
+              Interacting: 1
+        - Result: Success
+          Values:
+              ObjectClass: "IrregularLeverComponent"
+    Error:
+      type: object
+      required: [Result, Message]
+      properties:
+        Result:
+          type: string
+          enum: [Error]
+        Message:
+          type: string
+    Set:
+      type: object
+      required: [Result]
+      properties:
+        Result:
+          type: string
+          enum: [Success]
+    HttpError:
+      type: object
+      required: [errorCode, errorMessage]
+      properties:
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+    Subscription:
+      type: object
+      required: [RequestedSubscriptionID, Entries]
+      properties:
+        RequestedSubscriptionID:
+          type: integer
+        Entries:
+          type: array
+          items:
+            type: object
+            required: [Path, NodeValid, Values]
+            properties:
+              Path:
+                type: string
+              NodeValid:
+                type: boolean
+              Values:
+                # TODO find other possible values
+                type: 'null' 
+  responses: 
+    rootListResponse: 
+      description: List of root response
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/RecursiveNode'
+              - $ref: '#/components/schemas/Error'
+            discriminator:
+              propertyName: Result
+              mapping:
+                Success: '#/components/schemas/RecursiveNode'
+                Error: '#/components/schemas/Error'
+    specificListResponse: 
+      description: List response
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/SpecificList'
+              - $ref: '#/components/schemas/Error'
+            discriminator:
+              propertyName: Result
+              mapping:
+                Success: '#/components/schemas/SpecificList'
+                Error: '#/components/schemas/Error'
+    getResponse:
+      description: Ok
+      content: 
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/Get'
+              - $ref: '#/components/schemas/Error'
+            discriminator:
+              propertyName: Result
+              mapping:
+                Success: '#/components/schemas/Get'
+                Error: '#/components/schemas/Error'  
+    setResponse:
+      description: Set response
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/Set'
+              - $ref: '#/components/schemas/Error'
+            discriminator:
+              propertyName: Result
+              mapping:
+                Success: '#/components/schemas/Set'
+                Error: '#/components/schemas/Error'
+    invalidKey:
+      description: Forbidden
+      content: 
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HttpError'
+          example:
+            errorCode: dtg.comm.InvalidKey
+            errorMessage: "API Key for request doesn't match CommAPIKey.txt in the game config directory."
+    unknownSubscription:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HttpError'
+          example:
+            errorCode: dtg.comm.NoSuchSubscription
+            errorMessage: "Could not find requested subscription ID"
+  parameters: 
+    node: 
+      name: node
+      in: path
+      required: true
+      schema:
+        type: string
+      examples:
+        DriverInput/Wiper_F: 
+          value: "DriverInput/Wiper_F"
+          description: Wipers from the front cab of current locomotive.
+        DriverInput/Wiper_B: 
+          value: "DriverInput/Wiper_B"
+          description: Wipers from the back cab of current locomotive.
+        DriverInput: 
+          value: "DriverInput"
+          description: "The root node for driver inputs"
+    endpoint: 
+      name: endpoint
+      description: |
+        The name of the endpoint.
+        Full list of possible endpoints can be found by first querying the /list/{node} endpoint.
+      in: path
+      required: true
+      schema:
+        type: string
+      examples: 
+        InputValue: 
+          value: "InputValue"
+          description: "The endpoints input value"
+        Interacting:
+          value: "Interacting"
+          description: "Indicates if the user is interacting with the component"
+        ObjectName:
+          value: "ObjectName"
+          description: "The name of the object"
+        ObjectClass:
+          value: "ObjectClass"
+          description: "The class of the object"
+        Function.IsActive: 
+          value: "Function.IsActive"
+          description: "Indicates if the endpoint is active"
+paths:
+  /list:
+    get:
+      operationId: listNodes
+      summary: List nodes
+      description: List nodes recursively. It does _not_ list all nodes.
+      responses:
+        200:
+          $ref: '#/components/responses/rootListResponse'
+        403:
+          $ref: "#/components/responses/invalidKey"
+  /list/{node}:   
+    get:
+      operationId: listNode
+      summary: List node
+      description: List all child nodes and/or endpoints of a specific node.
+      parameters: 
+        - $ref: '#/components/parameters/node'
+      responses:
+        200:
+          $ref: '#/components/responses/specificListResponse'
+        403:
+          $ref: "#/components/responses/invalidKey"
+  /get/{node}.{endpoint}:
+    get:
+      summary: Get node
+      description: Get the current value of a node's endpoint.
+      operationId: getNodeEndpoint
+      parameters: 
+        - $ref: '#/components/parameters/node'
+        - $ref: '#/components/parameters/endpoint'
+      responses:
+        200:
+          $ref: "#/components/responses/getResponse"
+        403:
+          $ref: "#/components/responses/invalidKey"
+  /set/{node}.{endpoint}:
+    patch:
+      summary: Set node
+      description: Set a node's endpoint to a specific value.
+      operationId: setNodeEndpoint
+      parameters: 
+        - $ref: '#/components/parameters/node'
+        - $ref: '#/components/parameters/endpoint'
+        - name: Value
+          description: The value to set the endpoint to 
+          in: query
+          required: true
+          schema:
+            oneOf:
+              - type: number
+              - type: string
+              - type: boolean
+      responses:
+        200:
+          $ref: "#/components/responses/setResponse"
+        403:
+          $ref: "#/components/responses/invalidKey"
+  /subscription:
+    get: 
+      operationId: getSubscription
+      summary: Get subscription
+      description: |
+        Get the current values of a subscription.
+      parameters: 
+        - name: Subscription
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        400: 
+          $ref: "#/components/responses/unknownSubscription"
+        403:
+          $ref: "#/components/responses/invalidKey"
+    post: 
+      operationId: postSubscription
+      summary: Create subscription
+      description: |
+        Create a new subscription.
+        Usage is currently unknown.
+        The response does indicate success, but the values cannot be retrieved from the subscription.
+      parameters: 
+        - name: Subscription
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: path
+          in: query
+          required: false
+          schema: 
+            type: string
+  # TODO /info

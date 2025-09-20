@@ -900,7 +900,7 @@ export default function Home() {
                 </button>
                 <div className="flex gap-4">
                   <a
-                    href="https://redocly.github.io/redoc/?url=https://waaghals.github.io/tsw-inspector/openapi.yaml"
+                    href="https://redocly.github.io/redoc/?url=https://tsw-inspector.waaghals.dev/openapi.yaml"
                     className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     View API Docs

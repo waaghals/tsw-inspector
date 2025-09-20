@@ -3,7 +3,7 @@ Inspect all available game data of Traim Sim World 5.
 Usefull for debug purposes when writing your own controllers.
 
 ## API documentation
-A reverse engineered API documentation is available at [online](https://redocly.github.io/redoc/?url=https://waaghals.github.io/tsw-inspector/openapi.yaml).
+A reverse engineered API documentation is available at [online](https://redocly.github.io/redoc/?url=https://tsw-inspector.waaghals.dev/openapi.yaml).
 
 ## Contributing
 > [!NOTE]

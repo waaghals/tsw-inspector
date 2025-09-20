@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 export default function DocsPage() {
   const redocContainerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [yamlContent, setYamlContent] = useState<string>("");
   const [showFallback, setShowFallback] = useState(false);
 
@@ -86,8 +87,9 @@ export default function DocsPage() {
 
     // Cleanup function
     return () => {
-      if (redocContainerRef.current) {
-        redocContainerRef.current.innerHTML = '';
+      const container = redocContainerRef.current;
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, []);
@@ -107,12 +109,12 @@ export default function DocsPage() {
                 Try Redoc Again
               </button>
             )}
-            <a
+            <Link
               href="/"
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             >
               ← Back to Inspector
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -133,7 +135,7 @@ export default function DocsPage() {
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <h2 className="text-lg font-semibold text-yellow-800 mb-2">Fallback Documentation Viewer</h2>
             <p className="text-sm text-yellow-700">
-              Redoc couldn't be loaded from CDN. Showing raw OpenAPI specification below.
+              Redoc couldn&apos;t be loaded from CDN. Showing raw OpenAPI specification below.
               <button
                 onClick={() => window.location.reload()}
                 className="ml-2 underline hover:no-underline"
@@ -185,7 +187,7 @@ export default function DocsPage() {
 declare global {
   interface Window {
     Redoc?: {
-      init: (specUrl: string, options: any, element: HTMLElement | null) => void;
+      init: (specUrl: string, options: unknown, element: HTMLElement | null) => void;
     };
   }
 }

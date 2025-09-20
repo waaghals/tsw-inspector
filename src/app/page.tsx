@@ -16,8 +16,8 @@ function PushButtonComponent({ nodePath, client }: PushButtonComponentProps) {
       // Remove "Root/" prefix for the SET request
       const apiNodePath = nodePath.startsWith('Root/') ? nodePath.substring(5) : nodePath;
       await client.set(`${apiNodePath}.InputValue`, 1);
-    } catch (err) {
-      console.error('Failed to set button press:', err);
+    } catch {
+      console.error('Failed to set button press');
     }
   };
 
@@ -28,8 +28,8 @@ function PushButtonComponent({ nodePath, client }: PushButtonComponentProps) {
       // Remove "Root/" prefix for the SET request
       const apiNodePath = nodePath.startsWith('Root/') ? nodePath.substring(5) : nodePath;
       await client.set(`${apiNodePath}.InputValue`, 0);
-    } catch (err) {
-      console.error('Failed to set button release:', err);
+    } catch {
+      console.error('Failed to set button release');
     }
   };
 
@@ -101,7 +101,7 @@ function IrregularLeverComponent({ nodePath, client }: IrregularLeverComponentPr
 
       setLeverRange({ min, max });
       setCurrentLeverValue(current);
-    } catch (err) {
+    } catch {
       // Range endpoints might not exist, which is fine
       setLeverRange(null);
       setCurrentLeverValue(0);
@@ -120,8 +120,8 @@ function IrregularLeverComponent({ nodePath, client }: IrregularLeverComponentPr
 
       // Update the display immediately for responsive feedback
       setCurrentLeverValue(value);
-    } catch (err) {
-      console.error('Failed to set lever value:', err);
+    } catch {
+      console.error('Failed to set lever value');
     }
   };
 
@@ -140,15 +140,15 @@ function IrregularLeverComponent({ nodePath, client }: IrregularLeverComponentPr
           setCurrentLeverValue(actualValue);
         }
       }
-    } catch (err) {
-      console.error('Failed to fetch actual lever value:', err);
+    } catch {
+      console.error('Failed to fetch actual lever value');
     }
   };
 
   // Fetch lever range when component mounts or nodePath/client changes
   useEffect(() => {
     fetchLeverRange();
-  }, [nodePath, client]);
+  }, [nodePath, client, fetchLeverRange]);
 
   if (!leverRange) {
     return (
@@ -450,7 +450,7 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
       } else {
         setObjectClass(null);
       }
-    } catch (err) {
+    } catch {
       // ObjectClass endpoint might not exist, which is fine
       setObjectClass(null);
     }
@@ -546,15 +546,16 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
     };
 
     fetchNodeData();
-  }, [nodePath, client]);
+  }, [nodePath, client, fetchObjectClass]);
 
   // Cleanup intervals on unmount
   useEffect(() => {
     return () => {
-      intervalsRef.current.forEach((intervalId) => {
+      const intervals = intervalsRef.current;
+      intervals.forEach((intervalId) => {
         clearInterval(intervalId);
       });
-      intervalsRef.current.clear();
+      intervals.clear();
     };
   }, []);
 
@@ -816,7 +817,7 @@ export default function Home() {
 
   const filteredNodes = useMemo(() => {
     return filterNodes(nodes, searchTerm);
-  }, [nodes, searchTerm]);
+  }, [nodes, searchTerm, filterNodes]);
 
   const connectToAPI = async () => {
     if (!client) return;

@@ -16,7 +16,7 @@ export default function DocsPage() {
         setError(null);
 
         // Check if OpenAPI spec is accessible and load content for fallback
-        const specResponse = await fetch('/openapi.yaml');
+        const specResponse = await fetch('openapi.yaml');
         if (!specResponse.ok) {
           throw new Error(`Failed to load OpenAPI spec: ${specResponse.status}`);
         }

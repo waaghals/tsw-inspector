@@ -913,7 +913,7 @@ export default function Home() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Need help?</span>
                 <a
-                  href="docs"
+                  href="https://redocly.github.io/redoc/?url=https://waaghals.github.io/tsw-inspector/openapi.yaml"
                   className="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   View API Docs

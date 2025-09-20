@@ -58,7 +58,7 @@ export default function DocsPage() {
 
         if (redocLoaded && window.Redoc && redocContainerRef.current) {
           // Initialize Redoc
-          window.Redoc.init('/openapi.yaml', {
+          window.Redoc.init('openapi.yaml', {
             scrollYOffset: 60,
             theme: {
               colors: {

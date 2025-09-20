@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import TSWClient from "@/lib/clients";
 import { ApiNode, TWSApiResponse } from "@/lib/clients/types";
 
@@ -65,7 +65,7 @@ function IrregularLeverComponent({ nodePath, client }: IrregularLeverComponentPr
   const [leverRange, setLeverRange] = useState<{ min: number; max: number } | null>(null);
   const [currentLeverValue, setCurrentLeverValue] = useState<number>(0);
 
-  const fetchLeverRange = async () => {
+  const fetchLeverRange = useCallback(async () => {
     if (!client) {
       setLeverRange(null);
       return;
@@ -106,7 +106,7 @@ function IrregularLeverComponent({ nodePath, client }: IrregularLeverComponentPr
       setLeverRange(null);
       setCurrentLeverValue(0);
     }
-  };
+  }, [nodePath, client]);
 
   const handleLeverChange = async (value: number) => {
     if (!client) return;
@@ -148,7 +148,7 @@ function IrregularLeverComponent({ nodePath, client }: IrregularLeverComponentPr
   // Fetch lever range when component mounts or nodePath/client changes
   useEffect(() => {
     fetchLeverRange();
-  }, [nodePath, client, fetchLeverRange]);
+  }, [fetchLeverRange]);
 
   if (!leverRange) {
     return (
@@ -295,6 +295,7 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
   const [endpointValues, setEndpointValues] = useState<Map<string, EndpointValue>>(new Map());
   const [objectClass, setObjectClass] = useState<string | null>(null);
   const intervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const objectClassCacheRef = useRef<Map<string, string | null>>(new Map());
 
   const fetchEndpointValue = async (endpointName: string, updateLoading = true) => {
     if (!nodePath || !client) return;
@@ -433,9 +434,16 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
     await fetchEndpointValue(endpointName, true);
   };
 
-  const fetchObjectClass = async () => {
+  const fetchObjectClass = useCallback(async () => {
     if (!nodePath || !client) {
       setObjectClass(null);
+      return;
+    }
+
+    // Check cache first
+    const cached = objectClassCacheRef.current.get(nodePath);
+    if (cached !== undefined) {
+      setObjectClass(cached);
       return;
     }
 
@@ -446,15 +454,19 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
 
       if (response.Result === 'Success' && response.Values) {
         const classValue = Object.values(response.Values)[0];
-        setObjectClass(typeof classValue === 'string' ? classValue : null);
+        const objectClassValue = typeof classValue === 'string' ? classValue : null;
+        setObjectClass(objectClassValue);
+        objectClassCacheRef.current.set(nodePath, objectClassValue);
       } else {
         setObjectClass(null);
+        objectClassCacheRef.current.set(nodePath, null);
       }
     } catch {
       // ObjectClass endpoint might not exist, which is fine
       setObjectClass(null);
+      objectClassCacheRef.current.set(nodePath, null);
     }
-  };
+  }, [nodePath, client]);
 
 
 
@@ -478,7 +490,7 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
 
       const newIntervalId = setInterval(() => {
         fetchEndpointValue(endpointName, false);
-      }, 1000); // Fetch every second
+      }, 2000); // Fetch every 2 seconds
 
       intervalsRef.current.set(endpointName, newIntervalId);
     }
@@ -877,7 +889,8 @@ export default function Home() {
                   required
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Found in CommAPIKey.txt in your Train Sim World config directory
+                  Start Train Sim World with the -HTTPAPI flag to start the API.<br />
+                  Then use the key found in CommAPIKey.txt in your Train Sim World config directory.
                 </p>
               </div>
 

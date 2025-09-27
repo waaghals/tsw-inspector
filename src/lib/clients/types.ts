@@ -14,6 +14,7 @@ export interface TWSApiResponse {
   Result: 'Success' | 'Error';
   Values?: Record<string, unknown>;
   Error?: string;
+  Message?: string;
   NodePath?: string;
   NodeName?: string;
   Nodes?: ApiNode[];

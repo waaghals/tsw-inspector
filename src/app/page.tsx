@@ -273,6 +273,94 @@ function NodeTree({ node, level, onNodeClick, searchTerm }: NodeTreeProps) {
   );
 }
 
+function EndpointValueDisplay({ value }: { value: unknown }) {
+  const formatValue = (val: unknown): React.ReactNode => {
+    if (val === null) return <span className="text-gray-500 italic">null</span>;
+    if (val === undefined) return <span className="text-gray-500 italic">undefined</span>;
+
+    if (typeof val === 'boolean') {
+      return <span className={`font-semibold ${val ? 'text-green-600' : 'text-red-600'}`}>{String(val)}</span>;
+    }
+
+    if (typeof val === 'number') {
+      // Format large numbers (like timestamps) differently
+      if (Math.abs(val) > 1e15) {
+        return (
+          <div className="space-y-1">
+            <div><span className="text-blue-600 font-semibold">{val.toExponential(2)}</span> <span className="text-gray-500">(scientific)</span></div>
+            <div><span className="text-blue-600 font-semibold">{val.toLocaleString()}</span> <span className="text-gray-500">(formatted)</span></div>
+          </div>
+        );
+      }
+      return <span className="text-blue-600 font-semibold">{val}</span>;
+    }
+
+    if (typeof val === 'string') {
+      // Check if it's an ISO date string
+      if (val.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+        try {
+          const date = new Date(val);
+          return (
+            <div className="space-y-1">
+              <div><span className="text-purple-600 font-semibold">"{val}"</span> <span className="text-gray-500">(ISO string)</span></div>
+              <div><span className="text-purple-600 font-semibold">{date.toLocaleString()}</span> <span className="text-gray-500">(parsed)</span></div>
+            </div>
+          );
+        } catch {
+          // Fall through to regular string handling
+        }
+      }
+
+      // Check if it looks like a time format (+HH:MM:SS)
+      if (val.match(/^[+-]\d{2}:\d{2}:\d{2}/)) {
+        return (
+          <div>
+            <span className="text-purple-600 font-semibold">"{val}"</span> <span className="text-gray-500">(time offset)</span>
+          </div>
+        );
+      }
+
+      return <span className="text-green-600">"{val}"</span>;
+    }
+
+    if (Array.isArray(val)) {
+      return (
+        <div className="pl-4 border-l-2 border-gray-300 dark:border-gray-600">
+          <div className="text-orange-600 font-semibold mb-1">Array ({val.length} items):</div>
+          {val.map((item, index) => (
+            <div key={index} className="mb-1">
+              <span className="text-gray-500">[{index}]:</span> {formatValue(item)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (typeof val === 'object') {
+      const entries = Object.entries(val as Record<string, unknown>);
+      return (
+        <div className="pl-4 border-l-2 border-gray-300 dark:border-gray-600">
+          <div className="text-orange-600 font-semibold mb-1">Object ({entries.length} properties):</div>
+          {entries.map(([key, value]) => (
+            <div key={key} className="mb-1">
+              <span className="text-gray-700 dark:text-gray-300 font-medium">{key}:</span> {formatValue(value)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return <span className="text-gray-600">{String(val)}</span>;
+  };
+
+  return (
+    <div className="text-xs font-mono bg-white dark:bg-gray-800 p-3 rounded border">
+      <div className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Value:</div>
+      {formatValue(value)}
+    </div>
+  );
+}
+
 function WeatherControlComponent({ nodePath, client, endpoints }: WeatherControlComponentProps) {
   const [applyingPreset, setApplyingPreset] = useState<string | null>(null);
 
@@ -510,6 +598,300 @@ function WeatherControlComponent({ nodePath, client, endpoints }: WeatherControl
   );
 }
 
+function TimeOfDayComponent({ nodePath, client }: TimeOfDayComponentProps) {
+  const [timeData, setTimeData] = useState<{
+    localTime: string;
+    localTimeISO: string;
+    worldTime: string;
+    worldTimeISO: string;
+    systemTime: string;
+    systemTimeISO: string;
+    gmtOffset: number;
+    dayPercentage: number;
+    sunriseTime: string;
+    solarNoonTime: string;
+    sunsetTime: string;
+    sunPositionAzimuth: number;
+    sunPositionAltitude: number;
+    moonPositionAzimuth: number;
+    moonPositionAltitude: number;
+    originLatitude: number;
+    originLongitude: number;
+    timezone: string;
+    loading: boolean;
+    initialLoad: boolean;
+    error: string | null;
+  }>({
+    localTime: '',
+    localTimeISO: '',
+    worldTime: '',
+    worldTimeISO: '',
+    systemTime: '',
+    systemTimeISO: '',
+    gmtOffset: 0,
+    dayPercentage: 0,
+    sunriseTime: '',
+    solarNoonTime: '',
+    sunsetTime: '',
+    sunPositionAzimuth: 0,
+    sunPositionAltitude: 0,
+    moonPositionAzimuth: 0,
+    moonPositionAltitude: 0,
+    originLatitude: 0,
+    originLongitude: 0,
+    timezone: 'UTC',
+    loading: true,
+    initialLoad: true,
+    error: null
+  });
+
+  // Simple timezone estimation based on longitude
+  const getTimezoneFromCoordinates = useCallback((longitude: number, latitude: number): string => {
+    // This is a simplified timezone detection - for production use, consider a proper timezone API
+    // Rough timezone estimation based on longitude (15 degrees per hour)
+    const estimatedOffset = Math.round(longitude / 15);
+
+    // Common timezone mappings for Train Sim World routes
+    if (latitude >= 49 && latitude <= 55 && longitude >= 5 && longitude <= 15) {
+      // Central Europe (Germany, Netherlands, etc.)
+      return 'Europe/Berlin';
+    } else if (latitude >= 50 && latitude <= 59 && longitude >= -8 && longitude <= 2) {
+      // UK/Ireland
+      return 'Europe/London';
+    } else if (latitude >= 40 && latitude <= 50 && longitude >= -5 && longitude <= 10) {
+      // France, Spain, etc.
+      return 'Europe/Paris';
+    } else if (latitude >= 25 && latitude <= 49 && longitude >= -125 && longitude <= -66) {
+      // North America
+      if (longitude >= -125 && longitude <= -120) return 'America/Los_Angeles';
+      if (longitude >= -120 && longitude <= -105) return 'America/Denver';
+      if (longitude >= -105 && longitude <= -90) return 'America/Chicago';
+      if (longitude >= -90 && longitude <= -66) return 'America/New_York';
+    }
+
+    // Fallback to UTC offset estimation
+    if (estimatedOffset >= -12 && estimatedOffset <= 12) {
+      return `Etc/GMT${estimatedOffset <= 0 ? '+' : '-'}${Math.abs(estimatedOffset)}`;
+    }
+
+    return 'UTC';
+  }, []);
+
+  const fetchTimeData = useCallback(async (isInitialLoad = false) => {
+    if (!client) {
+      console.log('TimeOfDay: No client available');
+      setTimeData(prev => ({
+        ...prev,
+        loading: false,
+        initialLoad: false,
+        error: 'No client available'
+      }));
+      return;
+    }
+
+    try {
+      console.log('TimeOfDay: Starting fetch for', nodePath);
+      // Only show loading spinner on initial load, not on refreshes
+      if (isInitialLoad) {
+        setTimeData(prev => ({ ...prev, loading: true, error: null }));
+      } else {
+        setTimeData(prev => ({ ...prev, error: null }));
+      }
+
+      const apiNodePath = nodePath.startsWith('Root/') ? nodePath.substring(5) : nodePath;
+      const endpoint = `${apiNodePath}.Data`;
+      console.log('TimeOfDay: Fetching from endpoint:', endpoint);
+
+      const response = await client.get(endpoint);
+      console.log('TimeOfDay: Response received:', response);
+
+      if (response.Result === 'Success' && response.Values) {
+        const values = response.Values;
+
+        // Extract coordinates and determine timezone
+        const originLatitude = values.OriginLatitude as number;
+        const originLongitude = values.OriginLongitude as number;
+        const timezone = getTimezoneFromCoordinates(originLongitude, originLatitude);
+
+        // Parse ISO8601 strings to get readable time formats
+        const localTimeISO = values.LocalTimeISO8601 as string;
+        const worldTimeISO = values.WorldTimeISO8601 as string;
+        const systemTimeISO = values.SystemTimeISO8601 as string;
+
+        const localTime = new Date(localTimeISO).toLocaleTimeString('en-GB', { hour12: false });
+        const worldTime = new Date(worldTimeISO).toLocaleTimeString('en-GB', { hour12: false });
+        const systemTime = new Date(systemTimeISO).toLocaleTimeString('en-GB', { hour12: false });
+
+        setTimeData({
+          localTime,
+          localTimeISO,
+          worldTime,
+          worldTimeISO,
+          systemTime,
+          systemTimeISO,
+          gmtOffset: values.GMTOffset as number,
+          dayPercentage: values.DayPercentage as number,
+          sunriseTime: values.SunriseTime as string,
+          solarNoonTime: values.SolarNoonTime as string,
+          sunsetTime: values.SunsetTime as string,
+          sunPositionAzimuth: values.SunPositionAzimuth as number,
+          sunPositionAltitude: values.SunPositionAltitude as number,
+          moonPositionAzimuth: values.MoonPositionAzimuth as number,
+          moonPositionAltitude: values.MoonPositionAltitude as number,
+          originLatitude,
+          originLongitude,
+          timezone,
+          loading: false,
+          initialLoad: false,
+          error: null
+        });
+
+        console.log('TimeOfDay: Time data updated successfully');
+      } else {
+        const errorMsg = response.Message || response.Error || 'Failed to fetch time data';
+        console.log('TimeOfDay: API error:', errorMsg);
+        setTimeData(prev => ({
+          ...prev,
+          loading: false,
+          initialLoad: false,
+          error: errorMsg
+        }));
+      }
+    } catch (error) {
+      console.error('TimeOfDay: Exception occurred:', error);
+      setTimeData(prev => ({
+        ...prev,
+        loading: false,
+        initialLoad: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }));
+    }
+  }, [client, nodePath, getTimezoneFromCoordinates]);
+
+  // Auto-refresh time every second
+  useEffect(() => {
+    fetchTimeData(true); // Initial load
+    const interval = setInterval(() => fetchTimeData(false), 1000); // Subsequent refreshes
+    return () => clearInterval(interval);
+  }, [fetchTimeData]);
+
+  if (timeData.loading && timeData.initialLoad) {
+    return (
+      <div className="p-4">
+        <div className="flex items-center justify-center mb-2">
+          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Loading time data...</span>
+        </div>
+        <div className="text-xs text-gray-500 text-center mt-1">
+          TimeOfDay node: {nodePath}
+        </div>
+      </div>
+    );
+  }
+
+  if (timeData.error) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-sm text-red-500">Error: {timeData.error}</p>
+        <button
+          onClick={() => fetchTimeData(false)}
+          className="mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
+        Comprehensive Time & Astronomical Data - {timeData.timezone} - Updates every second
+      </p>
+
+      {/* Main Clock Display */}
+      <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-center border-2 border-gray-700">
+        <div className="text-2xl font-bold mb-1 tracking-wider">
+          {timeData.localTime}
+        </div>
+        <div className="text-sm opacity-75 mb-2">
+          Local Time (GMT{timeData.gmtOffset >= 0 ? '+' : ''}{timeData.gmtOffset})
+        </div>
+        <div className="text-xs opacity-60">
+          World Time: {timeData.worldTime} UTC
+        </div>
+      </div>
+
+      {/* Day Progress */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Day Progress</span>
+          <span className="text-sm font-mono text-blue-700 dark:text-blue-300">{(timeData.dayPercentage * 100).toFixed(1)}%</span>
+        </div>
+        <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+          <div
+            className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-1000"
+            style={{ width: `${timeData.dayPercentage * 100}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Solar Information */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
+          <h6 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-2">☀️ Solar Data</h6>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span className="text-yellow-700 dark:text-yellow-300">Sunrise:</span>
+              <span className="font-mono">{timeData.sunriseTime}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-yellow-700 dark:text-yellow-300">Solar Noon:</span>
+              <span className="font-mono">{timeData.solarNoonTime}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-yellow-700 dark:text-yellow-300">Sunset:</span>
+              <span className="font-mono">{timeData.sunsetTime}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-yellow-700 dark:text-yellow-300">Position:</span>
+              <span className="font-mono">{timeData.sunPositionAzimuth.toFixed(1)}° / {timeData.sunPositionAltitude.toFixed(1)}°</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg">
+          <h6 className="text-sm font-semibold text-indigo-800 dark:text-indigo-200 mb-2">🌙 Lunar Data</h6>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span className="text-indigo-700 dark:text-indigo-300">Azimuth:</span>
+              <span className="font-mono">{timeData.moonPositionAzimuth.toFixed(1)}°</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-indigo-700 dark:text-indigo-300">Altitude:</span>
+              <span className="font-mono">{timeData.moonPositionAltitude.toFixed(1)}°</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Location & System Info */}
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded">
+          <span className="text-gray-600 dark:text-gray-400">Location:</span>
+          <div className="font-mono text-xs">
+            {timeData.originLatitude.toFixed(4)}, {timeData.originLongitude.toFixed(4)}
+          </div>
+        </div>
+        <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded">
+          <span className="text-gray-600 dark:text-gray-400">System Time:</span>
+          <div className="font-mono text-xs">{timeData.systemTime}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface NodeValuesPanelProps {
   nodePath: string | null;
   client: TSWClient | null;
@@ -519,6 +901,11 @@ interface WeatherControlComponentProps {
   nodePath: string;
   client: TSWClient | null;
   endpoints: {Name: string; Writable: boolean}[];
+}
+
+interface TimeOfDayComponentProps {
+  nodePath: string;
+  client: TSWClient | null;
 }
 
 interface WeatherPreset {
@@ -546,6 +933,7 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
   const [endpointValues, setEndpointValues] = useState<Map<string, EndpointValue>>(new Map());
   const [objectClass, setObjectClass] = useState<string | null>(null);
   const [showWeatherControls, setShowWeatherControls] = useState<boolean>(false);
+  const [showTimeOfDayControls, setShowTimeOfDayControls] = useState<boolean>(false);
   const intervalsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const objectClassCacheRef = useRef<Map<string, string | null>>(new Map());
 
@@ -559,6 +947,18 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
     const hasWritableEndpoints = nodeData.Endpoints && nodeData.Endpoints.some(ep => ep.Writable);
 
     return isWeatherManager && !!hasWritableEndpoints;
+  }, []);
+
+  const shouldShowTimeOfDayControls = useCallback((nodePath: string | null, nodeData: TWSApiResponse | null): boolean => {
+    if (!nodePath || !nodeData) return false;
+
+    // Check if the node path contains TimeOfDay
+    const isTimeOfDay = nodePath.toLowerCase().includes('timeofday');
+
+    // Check specifically for the Data endpoint
+    const hasDataEndpoint = nodeData.Endpoints && nodeData.Endpoints.some(ep => ep.Name === 'Data');
+
+    return isTimeOfDay && !!hasDataEndpoint;
   }, []);
 
   const fetchEndpointValue = async (endpointName: string, updateLoading = true) => {
@@ -586,16 +986,18 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
     try {
       const response = await client.get(endpointPath);
       if (response.Result === 'Success' && response.Values) {
-        const value = Object.values(response.Values)[0]; // Get the first value
+        // Store the entire Values object instead of just the first value
+        const values = response.Values;
+        const firstValue = Object.values(values)[0]; // Keep for input field compatibility
         setEndpointValues(prev => {
           const existing = prev.get(endpointName);
           return new Map(prev.set(endpointName, {
             endpoint: endpointName,
-            value: value,
+            value: values, // Store the complete Values object
             loading: false,
             error: null,
             monitoring: existing?.monitoring || false,
-            inputValue: existing?.inputValue || String(value || ''),
+            inputValue: existing?.inputValue || String(firstValue || ''),
             settingValue: existing?.settingValue || false
           }));
         });
@@ -829,6 +1231,11 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
     setShowWeatherControls(shouldShowWeatherControls(nodePath, nodeData));
   }, [nodePath, nodeData, shouldShowWeatherControls]);
 
+  // Check for time of day controls when nodeData changes
+  useEffect(() => {
+    setShowTimeOfDayControls(shouldShowTimeOfDayControls(nodePath, nodeData));
+  }, [nodePath, nodeData, shouldShowTimeOfDayControls]);
+
   // Cleanup intervals on unmount
   useEffect(() => {
     const intervals = intervalsRef.current;
@@ -925,6 +1332,24 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
         </div>
       )}
 
+      {/* Time of Day Controls */}
+      {showTimeOfDayControls && (
+        <div className="mb-6">
+          <h4 className="text-md font-semibold mb-2">Time of Day</h4>
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Node Type: <code className="bg-white dark:bg-gray-800 px-2 py-1 rounded text-xs">TimeOfDay</code>
+              </span>
+            </div>
+            <TimeOfDayComponent
+              nodePath={nodePath}
+              client={client}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Show endpoints if available */}
       {nodeData.Endpoints && nodeData.Endpoints.length > 0 && (
         <div className="mb-6">
@@ -977,13 +1402,7 @@ function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
                           Error: {endpointValue.error}
                         </div>
                       ) : (
-                        <div className="text-xs font-mono bg-white dark:bg-gray-800 p-2 rounded border">
-                          <strong>Value:</strong> {
-                            typeof endpointValue.value === 'object'
-                              ? JSON.stringify(endpointValue.value, null, 2)
-                              : String(endpointValue.value)
-                          }
-                        </div>
+                        <EndpointValueDisplay value={endpointValue.value} />
                       )}
 
                       {endpoint.Writable && (

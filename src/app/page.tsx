@@ -2,8 +2,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import TSWClient from "@/lib/clients";
 import { ApiNode } from "@/lib/clients/types";
-import { NodeTree } from "@/app/components/ui/NodeTree";
-import { NodeValuesPanel } from "@/app/components/panels/NodeValuesPanel";
+import { NodeTree } from "@/components/ui/NodeTree";
+import { NodeValuesPanel } from "@/components/panels/NodeValuesPanel";
 
 
 

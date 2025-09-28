@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NodeTreeProps } from "@/app/types";
+import { NodeTreeProps } from "@/types";
 
 export function NodeTree({ node, level, onNodeClick, searchTerm }: NodeTreeProps) {
   const [expanded, setExpanded] = useState(false);

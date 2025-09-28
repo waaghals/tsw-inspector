@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { NodeValuesPanelProps, EndpointValue } from "@/app/types";
+import { NodeValuesPanelProps, EndpointValue } from "@/types";
 import { TWSApiResponse } from "@/lib/clients/types";
-import { PushButtonComponent } from "@/app/components/controls/PushButtonComponent";
-import { IrregularLeverComponent } from "@/app/components/controls/IrregularLeverComponent";
-import { WeatherControlComponent } from "@/app/components/controls/WeatherControlComponent";
-import { TimeOfDayComponent } from "@/app/components/controls/TimeOfDayComponent";
-import { EndpointValueDisplay } from "@/app/components/ui/EndpointValueDisplay";
+import { PushButtonComponent } from "@/components/controls/PushButtonComponent";
+import { IrregularLeverComponent } from "@/components/controls/IrregularLeverComponent";
+import { WeatherControlComponent } from "@/components/controls/WeatherControlComponent";
+import { TimeOfDayComponent } from "@/components/controls/TimeOfDayComponent";
+import { EndpointValueDisplay } from "@/components/ui/EndpointValueDisplay";
 
 export function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
   const [nodeData, setNodeData] = useState<TWSApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [endpointValues, setEndpointValues] = useState<Map<string, EndpointValue>>(new Map());
+  const [expandedEndpoints, setExpandedEndpoints] = useState<Set<string>>(new Set());
   const [objectClass, setObjectClass] = useState<string | null>(null);
   const [showWeatherControls, setShowWeatherControls] = useState<boolean>(false);
   const [showTimeOfDayControls, setShowTimeOfDayControls] = useState<boolean>(false);
@@ -167,7 +168,20 @@ export function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
   };
 
   const handleEndpointClick = async (endpointName: string) => {
-    await fetchEndpointValue(endpointName, true);
+    const isExpanded = expandedEndpoints.has(endpointName);
+
+    if (isExpanded) {
+      // Collapse the endpoint
+      setExpandedEndpoints(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(endpointName);
+        return newSet;
+      });
+    } else {
+      // Expand the endpoint and fetch its value
+      setExpandedEndpoints(prev => new Set(prev).add(endpointName));
+      await fetchEndpointValue(endpointName, true);
+    }
   };
 
   const fetchObjectClass = useCallback(async () => {
@@ -247,6 +261,7 @@ export function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
       });
       intervalsRef.current.clear();
       setEndpointValues(new Map());
+      setExpandedEndpoints(new Set());
       return;
     }
 
@@ -255,6 +270,7 @@ export function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
     });
     intervalsRef.current.clear();
     setEndpointValues(new Map());
+    setExpandedEndpoints(new Set());
 
     const fetchNodeData = async () => {
       setLoading(true);
@@ -401,17 +417,21 @@ export function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
 
       {nodeData.Endpoints && nodeData.Endpoints.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-md font-semibold mb-2">Endpoints (click to fetch value):</h4>
+          <h4 className="text-md font-semibold mb-2">Endpoints (click to expand/collapse):</h4>
           <div className="space-y-1">
             {nodeData.Endpoints.map((endpoint, index) => {
               const endpointValue = endpointValues.get(endpoint.Name);
+              const isExpanded = expandedEndpoints.has(endpoint.Name);
               return (
                 <div key={index} className="bg-green-50 dark:bg-green-900/20 rounded">
                   <div className="flex justify-between items-center p-2">
                     <div
-                      className="flex-1 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors rounded p-1"
+                      className="flex-1 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors rounded p-1 flex items-center gap-2"
                       onClick={() => handleEndpointClick(endpoint.Name)}
                     >
+                      <span className="text-xs text-gray-500">
+                        {isExpanded ? "▼" : "▶"}
+                      </span>
                       <span className="font-mono text-sm font-medium">{endpoint.Name}</span>
                     </div>
                     <div className="flex items-center gap-2 p-1">
@@ -443,7 +463,7 @@ export function NodeValuesPanel({ nodePath, client }: NodeValuesPanelProps) {
                       </span>
                     </div>
                   </div>
-                  {endpointValue && !endpointValue.loading && (
+                  {isExpanded && endpointValue && !endpointValue.loading && (
                     <div className="px-2 pb-2 space-y-2">
                       {endpointValue.error ? (
                         <div className="text-xs text-red-500 font-mono bg-red-50 dark:bg-red-900/20 p-1 rounded">

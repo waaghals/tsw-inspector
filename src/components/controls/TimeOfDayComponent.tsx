@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { TimeOfDayComponentProps } from "@/app/types";
+import { TimeOfDayComponentProps } from "@/types";
 
 export function TimeOfDayComponent({ nodePath, client }: TimeOfDayComponentProps) {
   const [timeData, setTimeData] = useState<{

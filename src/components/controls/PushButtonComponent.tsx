@@ -1,4 +1,4 @@
-import { PushButtonComponentProps } from "@/app/types";
+import { PushButtonComponentProps } from "@/types";
 
 export function PushButtonComponent({ nodePath, client }: PushButtonComponentProps) {
   const handlePushButtonPress = async () => {

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { WeatherControlComponentProps, WeatherPreset } from "@/app/types";
+import { WeatherControlComponentProps, WeatherPreset } from "@/types";
 
 export function WeatherControlComponent({ nodePath, client, endpoints }: WeatherControlComponentProps) {
   const [applyingPreset, setApplyingPreset] = useState<string | null>(null);

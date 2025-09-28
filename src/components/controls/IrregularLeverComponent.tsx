@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { IrregularLeverComponentProps } from "@/app/types";
+import { IrregularLeverComponentProps } from "@/types";
 
 export function IrregularLeverComponent({ nodePath, client }: IrregularLeverComponentProps) {
   const [leverRange, setLeverRange] = useState<{ min: number; max: number } | null>(null);
